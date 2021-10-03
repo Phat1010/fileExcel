@@ -10,10 +10,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.tribes.ChannelSender;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import BEAN.Users;
 import DB.DBConnection;
@@ -78,16 +83,30 @@ public class HomeDAO
 					
 					Sheet sheet = wb.getSheetAt(0);
 					
-					
-					
+					int stt = 0;
+					String name = " ";
+					int pass = 0 ;
 					for (int i=1; i<=sheet.getLastRowNum();i++)
 					{
 						Row row = sheet.getRow(i);
-						
-						int stt = (int) row.getCell(0).getNumericCellValue();
-						
-						String name = row.getCell(1).getStringCellValue();
-						int pass = (int) row.getCell(2).getNumericCellValue();
+						if(row.getCell(0)==null) {
+							stt = 0;
+						}
+						else if(row.getCell(1)==null) {
+						name = " ";
+						}
+						else if(row.getCell(2)==null) {
+							pass = 0;
+						}
+						else {
+							 stt = (int) row.getCell(0).getNumericCellValue();
+								
+							 name = row.getCell(1).getStringCellValue();
+							 pass = (int) row.getCell(2).getNumericCellValue();
+							
+							
+						}
+					
 						
 						
 						Users users = new Users();
@@ -148,4 +167,34 @@ public class HomeDAO
 					request.setAttribute("message",e.getMessage());
 				}
 			}
+		    // Get cell value
+		    private static Object getCellValue(Cell cell) {
+		        CellType cellType = cell.getCellTypeEnum();
+		        Object cellValue = null;
+		        switch (cellType) {
+		        case BOOLEAN:
+		            cellValue = cell.getBooleanCellValue();
+		            break;
+		        case FORMULA:
+		            Workbook workbook = cell.getSheet().getWorkbook();
+		            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+		            cellValue = evaluator.evaluate(cell).getNumberValue();
+		            break;
+		        case NUMERIC:
+		            cellValue = cell.getNumericCellValue();
+		            break;
+		        case STRING:
+		            cellValue = cell.getStringCellValue();
+		            break;
+		        case _NONE:
+		        case BLANK:
+		        case ERROR:
+		            break;
+		        default:
+		            break;
+		        }
+		 
+		        return cellValue;
+		    }
+
 }
